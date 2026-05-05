@@ -1,5 +1,6 @@
 langchain
-ctransformers
+langchain-community
+llama-cpp-python
 sentence-transformers
 faiss-cpu
 pypdf

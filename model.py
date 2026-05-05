@@ -1,9 +1,10 @@
 from langchain_community.document_loaders import PyPDFLoader, DirectoryLoader
-from langchain.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
-from langchain_community.llms import CTransformers
-from langchain.chains import RetrievalQA
+from langchain_community.llms import LlamaCpp
+from huggingface_hub import hf_hub_download
+from langchain_classic.chains import RetrievalQA
 import chainlit as cl
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
@@ -38,12 +39,19 @@ def retrieval_qa_chain(llm, prompt, db):
 
 #Loading the model
 def load_llm():
-    # Load the locally downloaded model here
-    llm = CTransformers(
-        model = "TheBloke/Llama-2-7B-Chat-GGML",
-        model_type="llama",
-        max_new_tokens = 512,
-        temperature = 0.9
+    # Download the GGUF model if not already downloaded locally
+    model_path = hf_hub_download(
+        repo_id="bartowski/Meta-Llama-3.1-8B-Instruct-GGUF",
+        filename="Meta-Llama-3.1-8B-Instruct-Q4_K_M.gguf"
+    )
+    
+    # Load the downloaded GGUF model
+    llm = LlamaCpp(
+        model_path=model_path,
+        temperature=0.9,
+        max_tokens=512,
+        n_ctx=2048, # Increased context window for Llama 3
+        verbose=False
     )
     return llm
 
